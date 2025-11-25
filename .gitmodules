@@ -1,0 +1,3 @@
+[submodule "src/flash_attention/cuda/third_party/cutlass"]
+	path = src/flash_attention/cuda/third_party/cutlass
+	url = https://github.com/NVIDIA/cutlass
