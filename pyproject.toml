@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flash-attention"
+version = "0.1.0"
+description = "FlashAttention forward pass implementations using CUDA and Triton"
+readme = "README.md"
+authors = [
+    { name = "Cayro Teixeira de Siqueira Neto" },
+    { name = "Leandro Augusto Lacerda Campos" },
+]
+requires-python = ">=3.11"
+
+dependencies = [
+    "torch>=2.9,<2.10",
+    "triton>=3.5,<3.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pixi.project]
+channels = ["nvidia", "pytorch", "conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.system-requirements]
+cuda = "12"
+
+[tool.pixi.dependencies]
+python = ">=3.11"
+# Build dependencies
+cuda-nvcc = { version = ">=12.6,<13", channel = "nvidia" }
+cxx-compiler = "*"
+# Setup tools required for cpp_extension
+setuptools = "*"
+ninja = "*"
+
+[tool.pixi.tasks]
+ninja-compdb = "ninja -C build -t compdb > build/compile_commands.json"
+setup-submodules = "git submodule update --init --recursive"
+
+[tool.pixi.feature.test.dependencies]
+pytest = "*"
+numpy = ">=2.3,<2.4"
+pandas = ">=2.3,<2.4"
+tabulate = "*"
+
+[tool.pixi.feature.test.pypi-dependencies]
+flash-attention = { path = ".", editable = true }
+
+[tool.pixi.feature.test.tasks]
+test = "pytest tests/"
+bench-memory = "python benchmarks/memory.py"
+bench-runtime = "python benchmarks/runtime.py"
+check-cuda = "python -c 'import torch; print(f\"CUDA Available: {torch.cuda.is_available()}\")'"
+
+[tool.pixi.feature.development.dependencies]
+black = "*"
+tree = "*"
+
+[tool.pixi.feature.development.tasks]
+tree-repo = "git ls-files --exclude-standard --cached --others | tree --fromfile ."
+
+
+[tool.pixi.environments]
+prd = { solve-group = "default" }
+tst = { features = ["test"], solve-group = "default" }
+dev = { features = ["test", "development"], solve-group = "default" }

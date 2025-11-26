@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# VS Code settings
+.vscode/settings.json

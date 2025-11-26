@@ -1,0 +1,14 @@
+If:
+  PathMatch: .*\.(cu|cuh)$
+CompileFlags:
+  Compiler: clang++
+  Add: [-xcuda]
+  Remove:
+    - --generate-dependencies-with-compile
+    - --dependency-output
+    - --expt-relaxed-constexpr
+    - --compiler-options
+    - -gencode*
+    - -lcudart
+    - -ccbin
+  BuiltinHeaders: QueryDriver
