@@ -1,7 +1,7 @@
 // Copyright 2025 Cayro Neto, Leandro Campos.
 // SPDX-License-Identifier: Apache-2.0
 //
-// Some of the code in this file is inspired by:
+// Some of the code in this file is adapted from:
 //
 // luliyucoordinate/cute-flash-attention
 //
@@ -588,6 +588,14 @@ torch::Tensor multi_head_attention_forward(at::Tensor query, at::Tensor key,
   if (head_dim == 64) {
     config::FlashAttentionConfig<64, 128, 128> config;
 
+    TORCH_CHECK(query_length % config.kBlockM == 0,
+                "Query sequence length must be a multiple of ", config.kBlockM,
+                " for head_dim=64. Got: ", query_length);
+
+    TORCH_CHECK(key_length % config.kBlockN == 0,
+                "Key/Value sequence length must be a multiple of ",
+                config.kBlockN, " for head_dim=64. Got: ", key_length);
+
     dim3 dimBlock = config.kNumThreads;
     dim3 dimGrid(ceil_div(query_length, config.kBlockM),
                  batch_size * num_heads);
@@ -606,6 +614,14 @@ torch::Tensor multi_head_attention_forward(at::Tensor query, at::Tensor key,
         softmax_scale);
   } else { // head_dim == 128
     config::FlashAttentionConfig<128, 64, 64> config;
+
+    TORCH_CHECK(query_length % config.kBlockM == 0,
+                "Query sequence length must be a multiple of ", config.kBlockM,
+                " for head_dim=128. Got: ", query_length);
+
+    TORCH_CHECK(key_length % config.kBlockN == 0,
+                "Key/Value sequence length must be a multiple of ",
+                config.kBlockN, " for head_dim=128. Got: ", key_length);
 
     dim3 dimBlock = config.kNumThreads;
     dim3 dimGrid(ceil_div(query_length, config.kBlockM),

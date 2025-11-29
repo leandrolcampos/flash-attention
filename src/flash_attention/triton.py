@@ -1,7 +1,7 @@
 # Copyright 2025 Cayro Neto, Leandro Campos.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Some of the code in this file is inspired by:
+# Some of the code in this file is adapted from:
 #
 # triton-lang/triton:
 # Copyright 2020-2022 OpenAI
@@ -177,6 +177,17 @@ def multi_head_attention_forward(
     softmax_scale = 1.0 / math.sqrt(head_dim)
 
     block_size = 128 if head_dim == 64 else 64
+
+    assert query_length % block_size == 0, (
+        f"Query sequence length must be a multiple of {block_size} "
+        f"for head_dim={head_dim}. Got: {query_length}"
+    )
+
+    assert key_length % block_size == 0, (
+        f"Key/Value sequence length must be a multiple of {block_size} "
+        f"for head_dim={head_dim}. Got: {key_length}"
+    )
+
     grid = (triton.cdiv(query_length, block_size), batch_size * num_heads, 1)
 
     _mha_fwd_kernel[grid](
